@@ -11,6 +11,7 @@ import { useContainer } from 'class-validator';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { SanitizeInputPipe } from './common/pipes/sanitize-input.pipe';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -55,6 +56,20 @@ async function bootstrap() {
   app.useGlobalFilters(allExceptionsFilter);
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
+
+  // 📘 Configuración de Swagger
+  const config = new DocumentBuilder()
+    .setTitle('OlaClick Restaurant API')
+    .setDescription('API para la gestión de órdenes del restaurante OlaClick')
+    .setVersion('1.0')
+    .addTag('orders')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api-docs', app, document, {
+    swaggerOptions: { persistAuthorization: true },
+  });
+
 
   await app.listen(process.env.PORT || 3000);
 }
