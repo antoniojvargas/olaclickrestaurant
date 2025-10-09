@@ -5,17 +5,20 @@ import { OrdersService } from './orders.service';
 import { OrdersRepository } from './repositories/orders.repository';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
+import { OrdersCleanupJob } from './jobs/orders-cleanup.job';
+import { ORDERS_REPOSITORY } from './repositories/orders.repository.interface';
 
 @Module({
   imports: [SequelizeModule.forFeature([Order, OrderItem])],
   controllers: [OrdersController],
   providers: [
     OrdersService,
+    OrdersCleanupJob,
     {
-      provide: 'OrdersRepositoryInterface',
+      provide: ORDERS_REPOSITORY,
       useClass: OrdersRepository,
     },
   ],
-  exports: ['OrdersRepositoryInterface'],
+  exports: [ORDERS_REPOSITORY],
 })
 export class OrdersModule {}

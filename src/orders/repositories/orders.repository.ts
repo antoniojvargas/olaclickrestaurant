@@ -5,7 +5,11 @@ import {
   OrderItem,
   OrderItemCreationAttributes,
 } from '../entities/order-item.entity';
-import { OrdersRepositoryInterface } from './orders.repository.interface';
+import {
+  OrdersRepositoryInterface,
+  ORDERS_REPOSITORY,
+} from './orders.repository.interface';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class OrdersRepository implements OrdersRepositoryInterface {
@@ -41,5 +45,14 @@ export class OrdersRepository implements OrdersRepositoryInterface {
 
   async delete(order: Order): Promise<void> {
     await order.destroy();
+  }
+
+  async deleteOlderThan(date: Date): Promise<number> {
+    const result = await this.orderModel.destroy({
+      where: {
+        createdAt: { [Op.lt]: date },
+      },
+    });
+    return result;
   }
 }

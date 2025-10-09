@@ -1,5 +1,12 @@
-// src/orders/entities/order.entity.ts
-import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  HasMany,
+  CreatedAt,
+  UpdatedAt,
+} from 'sequelize-typescript';
 import { OrderItem } from './order-item.entity';
 
 export interface OrderAttributes {
@@ -7,10 +14,12 @@ export interface OrderAttributes {
   clientName: string;
   totalAmount: number;
   status: 'initiated' | 'sent' | 'delivered';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface OrderCreationAttributes
-  extends Omit<OrderAttributes, 'id' | 'status'> {
+  extends Omit<OrderAttributes, 'id' | 'status' | 'createdAt' | 'updatedAt'> {
   status?: 'initiated' | 'sent' | 'delivered';
 }
 
@@ -38,4 +47,11 @@ export class Order extends Model<OrderAttributes, OrderCreationAttributes> {
 
   @HasMany(() => OrderItem)
   declare items: OrderItem[];
+
+  // 🕓 timestamps automáticos de Sequelize
+  @CreatedAt
+  declare createdAt: Date;
+
+  @UpdatedAt
+  declare updatedAt: Date;
 }

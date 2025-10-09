@@ -3,6 +3,7 @@ import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import type { OrdersRepositoryInterface } from './repositories/orders.repository.interface';
+import { ORDERS_REPOSITORY } from './repositories/orders.repository.interface';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Order } from './entities/order.entity';
 import { CACHE_KEYS } from './constants/cache-keys';
@@ -10,7 +11,7 @@ import { CACHE_KEYS } from './constants/cache-keys';
 @Injectable()
 export class OrdersService {
   constructor(
-    @Inject('OrdersRepositoryInterface')
+    @Inject(ORDERS_REPOSITORY)
     private readonly ordersRepository: OrdersRepositoryInterface,
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,

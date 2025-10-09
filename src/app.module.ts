@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -11,6 +12,7 @@ import IORedis from 'ioredis';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 import { ErrorInterceptor } from './common/interceptors/error.interceptor';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './common/logger/winston.config';
 
@@ -33,6 +35,7 @@ async function waitForRedis(host: string, port: number, retries = 5) {
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(), // ✅ habilita cron jobs
 
     // ✅ Winston global
     WinstonModule.forRoot(winstonConfig),
@@ -87,6 +90,7 @@ async function waitForRedis(host: string, port: number, retries = 5) {
   controllers: [AppController],
   providers: [
     AppService,
+    AllExceptionsFilter,
     LoggingInterceptor,
     TransformResponseInterceptor,
     ErrorInterceptor,

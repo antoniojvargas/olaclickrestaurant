@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 import { ErrorInterceptor } from './common/interceptors/error.interceptor';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './common/logger/winston.config';
 
@@ -30,6 +31,10 @@ async function bootstrap() {
     transformInterceptor,
     errorInterceptor,
   );
+
+  // 3️⃣ Filtro global (también obtenido del contenedor)
+  const allExceptionsFilter = app.get(AllExceptionsFilter);
+  app.useGlobalFilters(allExceptionsFilter);
 
   await app.listen(3000);
 }
