@@ -27,13 +27,17 @@ export class OrdersCleanupJob {
     });
 
     try {
-      const deletedCount = await this.ordersRepository.deleteOlderThan(thresholdDate);
+      const deletedCount =
+        await this.ordersRepository.deleteOlderThan(thresholdDate);
 
-      this.logger.log(`✅ Limpieza completada. Órdenes eliminadas: ${deletedCount}`, {
-        job: OrdersCleanupJob.name,
-        deletedCount,
-        timestamp: new Date().toISOString(),
-      });
+      this.logger.log(
+        `✅ Limpieza completada. Órdenes eliminadas: ${deletedCount}`,
+        {
+          job: OrdersCleanupJob.name,
+          deletedCount,
+          timestamp: new Date().toISOString(),
+        },
+      );
     } catch (error) {
       this.logger.error('❌ Error durante la limpieza de órdenes antiguas', {
         job: OrdersCleanupJob.name,

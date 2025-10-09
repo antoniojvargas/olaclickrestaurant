@@ -34,7 +34,10 @@ async function waitForRedis(host: string, port: number, retries = 5) {
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+    }),
     ScheduleModule.forRoot(), // ✅ habilita cron jobs
 
     // ✅ Winston global
@@ -42,48 +45,64 @@ async function waitForRedis(host: string, port: number, retries = 5) {
 
     SequelizeModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        dialect: 'postgres',
-        host: config.get<string>('DB_HOST'),
-        port: config.get<number>('DB_PORT'),
-        username: config.get<string>('DB_USER'),
-        password: config.get<string>('DB_PASS'),
-        database: config.get<string>('DB_NAME'),
-        autoLoadModels: true,
-        synchronize: true,
-      }),
-    }),
+      useFactory: (config: ConfigService) => {
+        const isTest = process.env.NODE_ENV === 'test';
 
-    CacheModule.registerAsync({
-      isGlobal: true,
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
-        const host = configService.get<string>('REDIS_HOST') || 'redis';
-        const port = parseInt(
-          configService.get<string>('REDIS_PORT') || '6379',
-          10,
-        );
-        const ttl = parseInt(
-          configService.get<string>('CACHE_TTL') || '30',
-          10,
-        );
-
-        console.log(`🚀 Connecting to Redis at ${host}:${port}`);
-
-        await waitForRedis(host, port);
-
-        const store = await redisStore({
-          host,
-          port,
-        });
-
-        return {
-          store,
-          ttl,
-        };
+        return isTest
+          ? {
+              dialect: 'sqlite',
+              storage: ':memory:',
+              autoLoadModels: true,
+              synchronize: true,
+              logging: false,
+            }
+          : {
+              dialect: 'postgres',
+              host: config.get<string>('DB_HOST'),
+              port: config.get<number>('DB_PORT'),
+              username: config.get<string>('DB_USER'),
+              password: config.get<string>('DB_PASS'),
+              database: config.get<string>('DB_NAME'),
+              autoLoadModels: true,
+              synchronize: true,
+            };
       },
     }),
+
+    ...(process.env.NODE_ENV === 'test'
+      ? [
+          CacheModule.register({
+            isGlobal: true,
+            store: 'memory',
+            ttl: 5,
+          }),
+        ]
+      : [
+          CacheModule.registerAsync({
+            isGlobal: true,
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: async (configService: ConfigService) => {
+              const host = configService.get<string>('REDIS_HOST') || 'redis';
+              const port = parseInt(
+                configService.get<string>('REDIS_PORT') || '6379',
+                10,
+              );
+              const ttl = parseInt(
+                configService.get<string>('CACHE_TTL') || '30',
+                10,
+              );
+
+              console.log(`🚀 Connecting to Redis at ${host}:${port}`);
+
+              await waitForRedis(host, port);
+
+              const store = await redisStore({ host, port });
+
+              return { store, ttl };
+            },
+          }),
+        ]),
 
     OrdersModule,
   ],

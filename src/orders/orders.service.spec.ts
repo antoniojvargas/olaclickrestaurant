@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { ConfigService } from '@nestjs/config';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { OrdersService } from './orders.service';
 import { ORDERS_REPOSITORY } from './repositories/orders.repository.interface';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -13,6 +15,10 @@ describe('OrdersService', () => {
   let mockOrdersRepository: any;
 
   let mockCacheManager: any;
+
+  let mockLogger: any;
+
+  let mockConfigService: any;
 
   beforeEach(async () => {
     mockOrdersRepository = {
@@ -30,6 +36,16 @@ describe('OrdersService', () => {
       del: jest.fn(),
     };
 
+    mockLogger = {
+      log: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    };
+
+    mockConfigService = {
+      get: jest.fn().mockReturnValue(30), // Default CACHE_TTL value
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrdersService,
@@ -40,6 +56,14 @@ describe('OrdersService', () => {
         {
           provide: CACHE_MANAGER,
           useValue: mockCacheManager,
+        },
+        {
+          provide: WINSTON_MODULE_NEST_PROVIDER,
+          useValue: mockLogger,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();
@@ -92,7 +116,7 @@ describe('OrdersService', () => {
       expect(mockCacheManager.set).toHaveBeenCalledWith(
         CACHE_KEYS.ORDERS_NOT_DELIVERED,
         mockOrders,
-        30 * 1000,
+        30 * 1000, // 30 seconds TTL from config
       );
     });
   });
