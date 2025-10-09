@@ -32,16 +32,16 @@ describe('OrdersController', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
+  it('Debe estar definido', () => {
     expect(controller).toBeDefined();
   });
 
   describe('findAll', () => {
-    it('should return all orders', async () => {
+    it('Debe retornar todas las ordenes', async () => {
       const mockOrders: Order[] = [
         {
           id: '123e4567-e89b-12d3-a456-426614174000',
-          clientName: 'Test Client',
+          clientName: 'Juan Perez',
           totalAmount: 100,
           status: 'initiated',
           items: [],
@@ -58,10 +58,10 @@ describe('OrdersController', () => {
   });
 
   describe('findOne', () => {
-    it('should return a single order', async () => {
+    it('Debe retornar una orden', async () => {
       const mockOrder: Order = {
         id: '123e4567-e89b-12d3-a456-426614174000',
-        clientName: 'Test Client',
+        clientName: 'Juan Perez',
         totalAmount: 100,
         status: 'initiated',
         items: [],
@@ -78,12 +78,12 @@ describe('OrdersController', () => {
   });
 
   describe('create', () => {
-    it('should create a new order', async () => {
+    it('Debe crear una nueva orden', async () => {
       const createOrderDto: CreateOrderDto = {
-        clientName: 'Test Client',
+        clientName: 'Juan Perez',
         items: [
           {
-            description: 'Test Item',
+            description: 'Chicharron',
             quantity: 2,
             unitPrice: 50,
           },
@@ -108,11 +108,11 @@ describe('OrdersController', () => {
   });
 
   describe('advanceStatus', () => {
-    it('should advance order status', async () => {
+    it('Debe avanzar el estatus de una orden', async () => {
       const orderId = '123e4567-e89b-12d3-a456-426614174000';
       const mockAdvancedOrder: Order = {
         id: orderId,
-        clientName: 'Test Client',
+        clientName: 'Juan Perez',
         totalAmount: 100,
         status: 'sent',
         items: [],

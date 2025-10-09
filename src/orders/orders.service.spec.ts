@@ -11,13 +11,9 @@ import { CACHE_KEYS } from './constants/cache-keys';
 
 describe('OrdersService', () => {
   let service: OrdersService;
-
   let mockOrdersRepository: any;
-
   let mockCacheManager: any;
-
   let mockLogger: any;
-
   let mockConfigService: any;
 
   beforeEach(async () => {
@@ -43,7 +39,7 @@ describe('OrdersService', () => {
     };
 
     mockConfigService = {
-      get: jest.fn().mockReturnValue(30), // Default CACHE_TTL value
+      get: jest.fn().mockReturnValue(30), // Valor por defecto de CACHE_TTL
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -75,22 +71,23 @@ describe('OrdersService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
+  it('debería estar definido', () => {
     expect(service).toBeDefined();
   });
 
+  // 🔍 Pruebas de findAll
   describe('findAll', () => {
     const mockOrders: Order[] = [
       {
         id: '123e4567-e89b-12d3-a456-426614174000',
-        clientName: 'Test Client',
+        clientName: 'Cliente de Prueba',
         totalAmount: 100,
         status: 'initiated',
         items: [],
       } as unknown as Order,
     ];
 
-    it('should return cached orders if available', async () => {
+    it('debería retornar las órdenes cacheadas si están disponibles', async () => {
       mockCacheManager.get.mockResolvedValue(mockOrders);
 
       const result = await service.findAll();
@@ -102,7 +99,7 @@ describe('OrdersService', () => {
       expect(mockOrdersRepository.findAllActive).not.toHaveBeenCalled();
     });
 
-    it('should fetch from repository and cache if not cached', async () => {
+    it('debería obtener las órdenes del repositorio y guardarlas en cache si no están cacheadas', async () => {
       mockCacheManager.get.mockResolvedValue(null);
       mockOrdersRepository.findAllActive.mockResolvedValue(mockOrders);
 
@@ -116,22 +113,23 @@ describe('OrdersService', () => {
       expect(mockCacheManager.set).toHaveBeenCalledWith(
         CACHE_KEYS.ORDERS_NOT_DELIVERED,
         mockOrders,
-        30 * 1000, // 30 seconds TTL from config
+        30 * 1000, // TTL de 30 segundos desde config
       );
     });
   });
 
+  // 🔍 Pruebas de findOne
   describe('findOne', () => {
     const orderId = '123e4567-e89b-12d3-a456-426614174000';
     const mockOrder: Order = {
       id: orderId,
-      clientName: 'Test Client',
+      clientName: 'Cliente de Prueba',
       totalAmount: 100,
       status: 'initiated',
       items: [],
     } as unknown as Order;
 
-    it('should return an order if found', async () => {
+    it('debería retornar la orden si existe', async () => {
       mockOrdersRepository.findById.mockResolvedValue(mockOrder);
 
       const result = await service.findOne(orderId);
@@ -140,7 +138,7 @@ describe('OrdersService', () => {
       expect(mockOrdersRepository.findById).toHaveBeenCalledWith(orderId);
     });
 
-    it('should throw NotFoundException if order not found', async () => {
+    it('debería lanzar NotFoundException si la orden no existe', async () => {
       mockOrdersRepository.findById.mockResolvedValue(null);
 
       await expect(service.findOne(orderId)).rejects.toThrow(NotFoundException);
@@ -148,12 +146,13 @@ describe('OrdersService', () => {
     });
   });
 
+  // 🧾 Pruebas de create
   describe('create', () => {
     const createOrderDto: CreateOrderDto = {
-      clientName: 'Test Client',
+      clientName: 'Cliente de Prueba',
       items: [
         {
-          description: 'Test Item',
+          description: 'Artículo de Prueba',
           quantity: 2,
           unitPrice: 50,
         },
@@ -162,13 +161,13 @@ describe('OrdersService', () => {
 
     const mockCreatedOrder: Order = {
       id: '123e4567-e89b-12d3-a456-426614174000',
-      clientName: 'Test Client',
+      clientName: 'Cliente de Prueba',
       totalAmount: 100,
       status: 'initiated',
       items: [],
     } as unknown as Order;
 
-    it('should create a new order', async () => {
+    it('debería crear una nueva orden', async () => {
       mockOrdersRepository.create.mockResolvedValue(mockCreatedOrder);
       mockOrdersRepository.createItems.mockResolvedValue([]);
       mockOrdersRepository.findById.mockResolvedValue(mockCreatedOrder);
@@ -183,7 +182,7 @@ describe('OrdersService', () => {
       });
       expect(mockOrdersRepository.createItems).toHaveBeenCalledWith([
         {
-          description: 'Test Item',
+          description: 'Artículo de Prueba',
           quantity: 2,
           unitPrice: 50,
           orderId: mockCreatedOrder.id,
@@ -195,13 +194,14 @@ describe('OrdersService', () => {
     });
   });
 
+  // ⏩ Pruebas de advanceStatus
   describe('advanceStatus', () => {
     const orderId = '123e4567-e89b-12d3-a456-426614174000';
 
-    it('should advance order from initiated to sent', async () => {
+    it('debería avanzar la orden de "initiated" a "sent"', async () => {
       const mockOrder: Order = {
         id: orderId,
-        clientName: 'Test Client',
+        clientName: 'Cliente de Prueba',
         totalAmount: 100,
         status: 'initiated',
         items: [],
@@ -220,10 +220,10 @@ describe('OrdersService', () => {
       );
     });
 
-    it('should delete order when advancing from sent status', async () => {
+    it('debería eliminar la orden al avanzar desde estado "sent"', async () => {
       const mockOrder: Order = {
         id: orderId,
-        clientName: 'Test Client',
+        clientName: 'Cliente de Prueba',
         totalAmount: 100,
         status: 'sent',
         items: [],
@@ -242,10 +242,10 @@ describe('OrdersService', () => {
       });
     });
 
-    it('should delete order when it is already delivered', async () => {
+    it('debería eliminar la orden si ya está entregada', async () => {
       const mockOrder: Order = {
         id: orderId,
-        clientName: 'Test Client',
+        clientName: 'Cliente de Prueba',
         totalAmount: 100,
         status: 'delivered',
         items: [],

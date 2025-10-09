@@ -20,9 +20,12 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { Order } from './entities/order.entity';
 
 @ApiTags('orders')
+// Etiqueta el controlador para Swagger con el grupo 'orders'
 @Controller('orders')
+// Define la ruta base del controlador: /orders
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
+  // Inyecta el servicio de órdenes
 
   // 📋 Listar todas las órdenes
   @Get()
@@ -48,27 +51,12 @@ export class OrdersController {
             },
           ],
         },
-        {
-          id: 2,
-          clientName: 'Carlos Pérez',
-          status: 'completada',
-          totalAmount: 70,
-          createdAt: '2025-10-08T12:30:00Z',
-          items: [
-            {
-              id: 1,
-              description: 'Empanadas',
-              unitPrice: 35,
-              quantity: 2,
-              subtotal: 70,
-            },
-          ],
-        },
       ],
     },
   })
   async findAll(): Promise<Order[]> {
     return this.ordersService.findAll();
+    // Llama al servicio para obtener todas las órdenes activas
   }
 
   // 🔍 Obtener una orden por ID
@@ -108,7 +96,9 @@ export class OrdersController {
     },
   })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
+    // El parámetro 'id' se valida como UUID
     return this.ordersService.findOne(id);
+    // Llama al servicio para obtener una orden específica
   }
 
   // 🧾 Crear una orden
@@ -137,8 +127,10 @@ export class OrdersController {
     },
   })
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  // Aplica validación de DTO y transforma automáticamente los tipos
   create(@Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(createOrderDto);
+    // Llama al servicio para crear la orden
   }
 
   // ⏩ Avanzar estado de una orden
@@ -162,5 +154,6 @@ export class OrdersController {
     @Param('id') id: string,
   ): Promise<Order | { message: string }> {
     return this.ordersService.advanceStatus(id);
+    // Llama al servicio para actualizar el estado de la orden
   }
 }
