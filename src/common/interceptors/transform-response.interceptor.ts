@@ -8,7 +8,9 @@ import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class TransformResponseInterceptor<T> implements NestInterceptor<T, any> {
+export class TransformResponseInterceptor<T>
+  implements NestInterceptor<T, any>
+{
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const method = request.method;

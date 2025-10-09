@@ -15,7 +15,7 @@ export class ErrorInterceptor implements NestInterceptor {
     const response = context.switchToHttp().getResponse();
 
     return next.handle().pipe(
-      catchError((err) => {
+      catchError((err: unknown) => {
         let status = HttpStatus.INTERNAL_SERVER_ERROR;
         let message = 'Internal server error';
         let errors: any = null;
@@ -26,12 +26,15 @@ export class ErrorInterceptor implements NestInterceptor {
 
           if (typeof res === 'string') {
             message = res;
-          } else if (typeof res === 'object') {
-            const { message: msg, error } = res as any;
-            message = msg || error || 'Unexpected error';
+          } else if (typeof res === 'object' && res !== null) {
+            const errorResponse = res as { message?: string; error?: string };
+            message =
+              errorResponse.message ||
+              errorResponse.error ||
+              'Unexpected error';
             errors = res;
           }
-        } else if (err.message) {
+        } else if (err instanceof Error && err.message) {
           message = err.message;
         }
 

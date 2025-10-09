@@ -1,9 +1,5 @@
 // src/orders/orders.service.ts
-import {
-  Injectable,
-  NotFoundException,
-  Inject,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import type { OrdersRepositoryInterface } from './repositories/orders.repository.interface';

@@ -16,7 +16,12 @@ export interface OrderItemAttributes {
   orderId: string;
 }
 
-export interface OrderItemCreationAttributes extends Omit<OrderItemAttributes, 'id'> {}
+export interface OrderItemCreationAttributes {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  orderId: string;
+}
 
 @Table({ tableName: 'order_items' })
 export class OrderItem extends Model<

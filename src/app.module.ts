@@ -22,14 +22,13 @@ async function waitForRedis(host: string, port: number, retries = 5) {
       client.disconnect();
       console.log('✅ Redis está listo');
       return;
-    } catch (e) {
+    } catch {
       console.log(`Redis no listo, reintentando (${i + 1}/${retries})...`);
       await setTimeout(1000);
     }
   }
   throw new Error('❌ No se pudo conectar a Redis');
 }
-
 
 @Module({
   imports: [
@@ -58,8 +57,14 @@ async function waitForRedis(host: string, port: number, retries = 5) {
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         const host = configService.get<string>('REDIS_HOST') || 'redis';
-        const port = parseInt(configService.get<string>('REDIS_PORT') || '6379', 10);
-        const ttl = parseInt(configService.get<string>('CACHE_TTL') || '30', 10);
+        const port = parseInt(
+          configService.get<string>('REDIS_PORT') || '6379',
+          10,
+        );
+        const ttl = parseInt(
+          configService.get<string>('CACHE_TTL') || '30',
+          10,
+        );
 
         console.log(`🚀 Connecting to Redis at ${host}:${port}`);
 

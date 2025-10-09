@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Order } from '../entities/order.entity';
-import { OrderItem } from '../entities/order-item.entity';
+import { Order, OrderCreationAttributes } from '../entities/order.entity';
+import {
+  OrderItem,
+  OrderItemCreationAttributes,
+} from '../entities/order-item.entity';
 import { OrdersRepositoryInterface } from './orders.repository.interface';
 
 @Injectable()
@@ -22,12 +25,14 @@ export class OrdersRepository implements OrdersRepositoryInterface {
     return this.orderModel.findByPk(id, { include: [OrderItem] });
   }
 
-  async create(orderData: Partial<Order>): Promise<Order> {
-    return this.orderModel.create(orderData as any);
+  async create(orderData: OrderCreationAttributes): Promise<Order> {
+    return this.orderModel.create(orderData);
   }
 
-  async createItems(items: Partial<OrderItem>[]): Promise<OrderItem[]> {
-    return Promise.all(items.map((item) => this.orderItemModel.create(item as any)));
+  async createItems(
+    items: OrderItemCreationAttributes[],
+  ): Promise<OrderItem[]> {
+    return Promise.all(items.map((item) => this.orderItemModel.create(item)));
   }
 
   async update(order: Order, updates: Partial<Order>): Promise<Order> {

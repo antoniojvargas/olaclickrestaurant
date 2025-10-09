@@ -33,19 +33,23 @@ export class LoggingInterceptor implements NestInterceptor {
       tap({
         next: () => {
           const elapsed = Date.now() - now;
-          this.logger.log(`📤 [${method}] ${url} — Completado en ${elapsed}ms`, {
-            method,
-            url,
-            ip,
-            duration: `${elapsed}ms`,
-            timestamp: new Date().toISOString(),
-          });
+          this.logger.log(
+            `📤 [${method}] ${url} — Completado en ${elapsed}ms`,
+            {
+              method,
+              url,
+              ip,
+              duration: `${elapsed}ms`,
+              timestamp: new Date().toISOString(),
+            },
+          );
         },
-        error: (err) => {
+        error: (err: unknown) => {
           const elapsed = Date.now() - now;
+          const errorStack = err instanceof Error ? err.stack : 'Unknown error';
           this.logger.error(
             `🛑 [${method}] ${url} — Error tras ${elapsed}ms`,
-            err.stack,
+            errorStack,
           );
         },
       }),
