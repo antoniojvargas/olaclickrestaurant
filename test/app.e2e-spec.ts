@@ -5,13 +5,12 @@ import { AppModule } from '../src/app.module';
 import { Sequelize } from 'sequelize-typescript';
 import { OrdersService } from '../src/orders/orders.service';
 
-jest.setTimeout(20000); 
+jest.setTimeout(20000);
 
 describe('Orders API (e2e)', () => {
   let app: INestApplication;
   let sequelize: Sequelize;
   let ordersService: OrdersService;
-  let createdOrderId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

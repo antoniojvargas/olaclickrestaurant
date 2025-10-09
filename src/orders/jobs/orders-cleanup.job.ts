@@ -38,13 +38,24 @@ export class OrdersCleanupJob {
           timestamp: new Date().toISOString(),
         },
       );
-    } catch (error) {
-      this.logger.error('❌ Error durante la limpieza de órdenes antiguas', {
-        job: OrdersCleanupJob.name,
-        error: error.message,
-        stack: error.stack,
-        timestamp: new Date().toISOString(),
-      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.logger.error('❌ Error durante la limpieza de órdenes antiguas', {
+          job: OrdersCleanupJob.name,
+          error: error.message,
+          stack: error.stack,
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        this.logger.error(
+          '❌ Error desconocido durante la limpieza de órdenes antiguas',
+          {
+            job: OrdersCleanupJob.name,
+            error,
+            timestamp: new Date().toISOString(),
+          },
+        );
+      }
     }
   }
 }

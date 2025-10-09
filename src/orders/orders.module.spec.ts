@@ -58,11 +58,11 @@ describe('OrdersModule', () => {
 
     // Check that we have controllers
     expect(controllers).toContain(OrdersController);
-    
+
     // Check that we have providers
     expect(providers).toContain(OrdersService);
     expect(providers).toContain(OrdersCleanupJob);
-    
+
     // Check that ORDERS_REPOSITORY is exported
     expect(exports).toContain(ORDERS_REPOSITORY);
   });

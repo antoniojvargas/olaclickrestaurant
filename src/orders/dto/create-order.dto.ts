@@ -7,12 +7,7 @@ import {
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-  Trim,
-  Escape,
-  ToInt,
-  ToFloat,
-} from 'class-sanitizer';
+import { Trim, Escape, ToInt, ToFloat } from 'class-sanitizer';
 
 class OrderItemDto {
   @IsString()
