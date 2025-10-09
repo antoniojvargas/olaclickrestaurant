@@ -49,7 +49,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message:
         typeof message === 'string'
           ? message
-          : (message as any).message || 'Unexpected error occurred',
+          : message.message || 'Unexpected error occurred',
       timestamp: new Date().toISOString(),
       path: request.url,
     });

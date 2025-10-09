@@ -5,10 +5,7 @@ import {
   OrderItem,
   OrderItemCreationAttributes,
 } from '../entities/order-item.entity';
-import {
-  OrdersRepositoryInterface,
-  ORDERS_REPOSITORY,
-} from './orders.repository.interface';
+import type { OrdersRepositoryInterface } from './orders.repository.interface';
 import { Op } from 'sequelize';
 
 @Injectable()

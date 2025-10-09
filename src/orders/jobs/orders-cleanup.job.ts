@@ -20,8 +20,11 @@ export class OrdersCleanupJob {
     const thresholdDate = new Date();
     thresholdDate.setDate(thresholdDate.getDate() - 7); // ejemplo: más de 7 días
 
-    const deletedCount = await this.ordersRepository.deleteOlderThan(thresholdDate);
+    const deletedCount =
+      await this.ordersRepository.deleteOlderThan(thresholdDate);
 
-    this.logger.log(`✅ Limpieza completada. Órdenes eliminadas: ${deletedCount}`);
+    this.logger.log(
+      `✅ Limpieza completada. Órdenes eliminadas: ${deletedCount}`,
+    );
   }
 }
