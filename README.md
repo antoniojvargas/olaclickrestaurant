@@ -22,7 +22,7 @@ El proyecto corre en 3 contenedores:
 | ------------ | --------------------------- | ------ |
 | **backend**  | API NestJS                  | `3000` |
 | **postgres** | Base de datos               | `5432` |
-| **redis**    | Cache / mensajes temporales | `6379` |
+| **redis**    | Cache                       | `6379` |
 
 ## 🧩 Estructura del proyecto
 
