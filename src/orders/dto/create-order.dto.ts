@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsArray,
   ValidateNested,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -13,15 +14,17 @@ class OrderItemDto {
   description: string;
 
   @IsNumber()
-  quantity: number;
+  @Min(0, { message: 'El precio unitario debe ser mayor o igual a 0' })
+  unitPrice: number;
 
   @IsNumber()
-  unitPrice: number;
+  @Min(1, { message: 'La cantidad debe ser al menos 1' })
+  quantity: number;
 }
 
 export class CreateOrderDto {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'El nombre del cliente es obligatorio' })
   clientName: string;
 
   @IsArray()

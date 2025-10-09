@@ -1,46 +1,42 @@
+// src/orders/orders.service.ts
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
   Inject,
 } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { InjectModel } from '@nestjs/sequelize';
-import { Order } from './entities/order.entity';
-import { OrderItem } from './entities/order-item.entity';
-import { CreateOrderDto } from './dto/create-order.dto';
 import type { Cache } from 'cache-manager';
+import type { OrdersRepositoryInterface } from './repositories/orders.repository.interface';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { Order } from './entities/order.entity';
+import { CACHE_KEYS } from './constants/cache-keys';
 
 @Injectable()
 export class OrdersService {
   constructor(
-    @InjectModel(Order) private orderModel: typeof Order,
-    @InjectModel(OrderItem) private orderItemModel: typeof OrderItem,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject('OrdersRepositoryInterface')
+    private readonly ordersRepository: OrdersRepositoryInterface,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
   ) {}
 
   async findAll(): Promise<Order[]> {
-    const cacheKey = 'orders_not_delivered';
-    const cachedOrders = await this.cacheManager.get<Order[]>(cacheKey);
+    const cacheKey = CACHE_KEYS.ORDERS_NOT_DELIVERED;
+    const cached = await this.cacheManager.get<Order[]>(cacheKey);
 
-    if (cachedOrders) {
-      console.log('✅ Retornando ordenes desde el cache');
-      return cachedOrders;
+    if (cached) {
+      console.log('✅ Retornando órdenes desde el caché');
+      return cached;
     }
 
-    const orders = await this.orderModel.findAll({
-      where: { status: ['initiated', 'sent'] },
-      include: [OrderItem],
-    });
-
+    const orders = await this.ordersRepository.findAllActive();
     await this.cacheManager.set(cacheKey, orders, 30 * 1000);
-
-    console.log('💾 Ordenes en el cache por 30 segundos');
+    console.log('💾 Órdenes cacheadas por 30 segundos');
     return orders;
   }
 
   async findOne(id: string): Promise<Order> {
-    const order = await this.orderModel.findByPk(id, { include: [OrderItem] });
+    const order = await this.ordersRepository.findById(id);
     if (!order) throw new NotFoundException(`Orden ${id} no encontrada`);
     return order;
   }
@@ -51,48 +47,41 @@ export class OrdersService {
       0,
     );
 
-    const order = await this.orderModel.create({
+    const order = await this.ordersRepository.create({
       clientName: dto.clientName,
       totalAmount,
       status: 'initiated',
     });
 
-    await Promise.all(
-      dto.items.map((item) =>
-        this.orderItemModel.create({
-          ...item,
-          orderId: order.id,
-        }),
-      ),
+    await this.ordersRepository.createItems(
+      dto.items.map((item) => ({ ...item, orderId: order.id })),
     );
 
-    await this.cacheManager.del('orders_not_delivered');
-
+    await this.cacheManager.del(CACHE_KEYS.ORDERS_NOT_DELIVERED);
     return this.findOne(order.id);
   }
 
   async advanceStatus(id: string): Promise<Order | { message: string }> {
     const order = await this.findOne(id);
 
-    const nextStatusMap: Record<
-      'initiated' | 'sent' | 'delivered',
-      'sent' | 'delivered' | null
-    > = {
+    const nextStatusMap = {
       initiated: 'sent',
       sent: 'delivered',
       delivered: null,
-    };
+    } as const;
 
     const nextStatus = nextStatusMap[order.status];
 
-    if (!nextStatus) {
-      await order.destroy();
-      await this.cacheManager.del(`order_${id}`);
+    if (nextStatus === 'delivered' || !nextStatus) {
+      await this.ordersRepository.delete(order);
+      await this.cacheManager.del(CACHE_KEYS.ORDERS_NOT_DELIVERED);
+      console.log(`🗑️ Orden ${id} entregada y eliminada del sistema`);
       return { message: `Order ${id} has been delivered and removed.` };
     }
 
-    await order.update({ status: nextStatus });
-    await this.cacheManager.del('orders_not_delivered');
+    await this.ordersRepository.update(order, { status: nextStatus });
+    await this.cacheManager.del(CACHE_KEYS.ORDERS_NOT_DELIVERED);
+    console.log(`🔄 Orden ${id} avanzó a estado: ${nextStatus}`);
     return order;
   }
 }

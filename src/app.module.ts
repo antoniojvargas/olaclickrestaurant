@@ -6,10 +6,37 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-ioredis-yet';
 import { OrdersModule } from './orders/orders.module';
+import { setTimeout } from 'timers/promises';
+import IORedis from 'ioredis';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
+import { ErrorInterceptor } from './common/interceptors/error.interceptor';
+import { WinstonModule } from 'nest-winston';
+import { winstonConfig } from './common/logger/winston.config';
+
+async function waitForRedis(host: string, port: number, retries = 5) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const client = new IORedis({ host, port });
+      await client.ping();
+      client.disconnect();
+      console.log('✅ Redis está listo');
+      return;
+    } catch (e) {
+      console.log(`Redis no listo, reintentando (${i + 1}/${retries})...`);
+      await setTimeout(1000);
+    }
+  }
+  throw new Error('❌ No se pudo conectar a Redis');
+}
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+
+    // ✅ Winston global
+    WinstonModule.forRoot(winstonConfig),
 
     SequelizeModule.forRootAsync({
       inject: [ConfigService],
@@ -36,6 +63,8 @@ import { OrdersModule } from './orders/orders.module';
 
         console.log(`🚀 Connecting to Redis at ${host}:${port}`);
 
+        await waitForRedis(host, port);
+
         const store = await redisStore({
           host,
           port,
@@ -51,6 +80,11 @@ import { OrdersModule } from './orders/orders.module';
     OrdersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    LoggingInterceptor,
+    TransformResponseInterceptor,
+    ErrorInterceptor,
+  ],
 })
 export class AppModule {}

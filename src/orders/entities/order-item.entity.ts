@@ -8,7 +8,7 @@ import {
 } from 'sequelize-typescript';
 import { Order } from './order.entity';
 
-interface OrderItemAttributes {
+export interface OrderItemAttributes {
   id: string;
   description: string;
   quantity: number;
@@ -16,7 +16,7 @@ interface OrderItemAttributes {
   orderId: string;
 }
 
-interface OrderItemCreationAttributes extends Omit<OrderItemAttributes, 'id'> {}
+export interface OrderItemCreationAttributes extends Omit<OrderItemAttributes, 'id'> {}
 
 @Table({ tableName: 'order_items' })
 export class OrderItem extends Model<
