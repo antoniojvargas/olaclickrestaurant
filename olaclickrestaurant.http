@@ -1,0 +1,9 @@
+GET http://localhost:3000/orders
+
+###
+
+GET http://localhost:3000/orders/997308fc-4811-44a2-929f-95c0c7352228
+
+###
+
+POST http://localhost:3000/orders/43f7a35e-929e-4b4b-8715-bdacaf270a87/advance

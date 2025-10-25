@@ -14,12 +14,14 @@ export class OrderItemsRepository {
     // Esto permite interactuar con la tabla 'order_items' de la base de datos
   ) {}
 
+
   // Método para crear un nuevo registro de item de orden
   async create(itemData: OrderItemCreationAttributes) {
     // Llama al modelo Sequelize para insertar un nuevo registro
     return this.orderItemModel.create(itemData);
   }
 
+  
   // Método para obtener todos los items asociados a una orden específica
   async findByOrder(orderId: string) {
     // Busca todos los registros de OrderItem que tengan el orderId indicado

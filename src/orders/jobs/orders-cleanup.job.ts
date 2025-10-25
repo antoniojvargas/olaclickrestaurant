@@ -31,6 +31,7 @@ export class OrdersCleanupJob {
       timestamp: new Date().toISOString(),
     });
 
+    
     try {
       // Llama al repositorio para eliminar órdenes anteriores a la fecha límite
       const deletedCount =

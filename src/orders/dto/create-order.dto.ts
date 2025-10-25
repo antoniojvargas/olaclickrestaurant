@@ -27,6 +27,7 @@ class OrderItemDto {
   quantity: number;
 }
 
+
 export class CreateOrderDto {
   @IsString()
   @IsNotEmpty({ message: 'El nombre del cliente es obligatorio' })
